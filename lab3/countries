@@ -1,0 +1,16 @@
+Denmark
+	Capitol: Kobenhagen
+	Population: 1337
+	Area: 34234
+	Neighbor: Sweden
+Norway
+	Capitol: Oslo
+	Population: 5033675
+	Area: 385186
+	Neighbor: Sweden
+Sweden
+	Capitol: Stockholm
+	Population: 9555893
+	Area: 449964
+	Neighbor: Denmark
+	Neighbor: Norway
