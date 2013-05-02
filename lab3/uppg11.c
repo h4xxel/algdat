@@ -18,7 +18,7 @@ struct LIST **subsets(char *set) {
 	unsigned long length=1UL<<stringlen;
 	char *s;
 	struct SET *tmpset1, *tmpset2;
-	struct LIST **list=calloc(sizeof(void *), length+2), *tmplist;
+	struct LIST **list=calloc(sizeof(void *), stringlen+2), *tmplist;
 	
 	for(a=0; a<length; a++) {
 		for(tmpset1=NULL, s=set, b=a, i=0; b; b>>=1, s++)
