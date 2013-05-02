@@ -634,15 +634,13 @@ static void db_save() {
 		puts("Warning: Unable to save database file\n");
 		return;
 	}
-	
 	for(c=country; c; c=c->next) {
 		fprintf(f, "%s\n", c->name);
 		fprintf(f, "\tCapitol: %s\n", c->capitol);
 		fprintf(f, "\tPopulation: %lu\n", c->population);
 		fprintf(f, "\tArea: %lu\n", c->area);
-		for(n=c->neighbor; n; n=n->next) {
+		for(n=c->neighbor; n; n=n->next)
 			fprintf(f, "\tNeighbor: %s\n", n->country?n->country->name:n->name);
-		}
 	}
 }
 
