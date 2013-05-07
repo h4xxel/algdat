@@ -2,6 +2,11 @@
 #include <stdlib.h>
 #include <string.h>
 
+struct NUMBER *add_number(struct NUMBER *n1, struct NUMBER *n2);
+struct NUMBER *subtract_number(struct NUMBER *n1, struct NUMBER *n2);
+struct NUMBER *multiply_number(struct NUMBER *n1, struct NUMBER *n2);
+struct NUMBER *divide_number(struct NUMBER *n1, struct NUMBER *n2);
+
 struct DIGIT {
 	unsigned char digit;
 	struct DIGIT *next;
@@ -18,6 +23,53 @@ struct NUMBER {
 	struct DIGIT *last;
 	enum SIGNED sign;
 };
+
+struct MAXMIN {
+	struct NUMBER *max;
+	struct NUMBER *min;
+};
+
+struct MAXMIN maxmin(struct NUMBER *n1, struct NUMBER *n2) {
+	struct MAXMIN ret;
+	struct DIGIT *d1, *d2;
+	if(n1->sign^n2->sign) {
+		ret.max=n1->sign?n2:n1;
+		ret.min=n1->sign?n1:n2;
+		return ret;
+	}
+	ret.max=ret.min=NULL;
+	for(d1=n1->last, d2=n2->last; d1||d2; d1=d1->prev, d2=d2->prev) {
+		if(!d1) {
+			if(n1->sign)
+				goto invert1;
+			invert2:
+			ret.max=n2;
+			ret.min=n1;
+			return ret;
+		}
+		if(!d2) {
+			if(n2->sign)
+				goto invert2;
+			invert1:
+			ret.max=n1;
+			ret.min=n2;
+			return ret;
+		}
+		if(d2->digit>d1->digit) {
+			ret.max=n2;
+			ret.min=n1;
+		} else if(d1->digit>d2->digit) {
+			ret.max=n1;
+			ret.min=n2;
+		}
+	}
+	if(n1->sign) {
+		n1=ret.max;
+		ret.max=ret.min;
+		ret.min=n1;
+	}
+	return ret;
+}
 
 void append_digit(struct NUMBER *number, unsigned char digit) {
 	struct DIGIT *d;
@@ -79,10 +131,15 @@ struct NUMBER *add_number(struct NUMBER *n1, struct NUMBER *n2) {
 	char carry=0, a;
 	struct DIGIT *d1, *d2;
 	struct NUMBER *res;
-	res=calloc(sizeof(struct NUMBER), 1);
-	if(n1->sign^n2->sign) {
-		
+	if(n1->sign) {
+		n1->sign=UNSIGNED;
+		return subtract_number(n2, n1);
 	}
+	if(n2->sign) {
+		n2->sign=UNSIGNED;
+		return subtract_number(n2, n1);
+	}
+	res=calloc(sizeof(struct NUMBER), 1);
 	d1=n1->last;
 	d2=n2->last;
 	while(d1||d2) {
@@ -104,8 +161,49 @@ struct NUMBER *add_number(struct NUMBER *n1, struct NUMBER *n2) {
 }
 
 struct NUMBER *subtract_number(struct NUMBER *n1, struct NUMBER *n2) {
-	n1->sign=!n1->sign;
-	return add_number(n1, n2);
+	char carry=0, a;
+	struct DIGIT *d1, *d2;
+	struct NUMBER *res;
+	if(n1->sign) {
+		n1->sign=UNSIGNED;
+		res=add_number(n2, n1);
+		res->sign=SIGNED;
+		return res;
+	}
+	if(n2->sign) {
+		n2->sign=UNSIGNED;
+		//res=add_number(n2, n1);
+		res->sign=SIGNED;
+	}
+	if(maxmin(n1, n2).max==n2) {
+		res=subtract_number(n2, n1);
+		res->sign=SIGNED;
+		return res;
+	}
+	res=calloc(sizeof(struct NUMBER), 1);
+	d1=n1->last;
+	d2=n2->last;
+	while(d1||d2) {
+		a=0;
+		if(d1) {
+			a=d1->digit;
+			d1=d1->prev;
+		}
+		if(d2) {
+			a-=d2->digit;
+			d2=d2->prev;
+		}
+		a-=carry;
+		carry=0;
+		if(a<0) {
+			carry=1;
+			a+=10;
+		}
+		if(a||d1||d2)
+			prepend_digit(res, a);
+	}
+	
+	return res;
 }
 
 struct NUMBER *multiply_number(struct NUMBER *n1, struct NUMBER *n2) {
