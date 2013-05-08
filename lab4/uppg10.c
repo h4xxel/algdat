@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 
 struct MORSE_TREE {
 	char c;
@@ -175,7 +176,7 @@ void print_cleartext(const char *morse) {
 
 void print_morse(const char *string) {
 	for(; *string; string++)
-		printf("%s ", char_to_morse_lookup[*string]);
+		printf("%s ", char_to_morse_lookup[tolower(*string)]);
 }
 
 int main(int argc, char **argv) {

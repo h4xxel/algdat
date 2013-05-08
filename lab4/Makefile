@@ -1,5 +1,5 @@
 CFLAGS	+= -g -O0
-LDFLAGS	+= -lrt
+LDFLAGS	+= -lrt -ldarnit
 
 SRCFILES=$(wildcard *.c)
 OBJFILES=$(SRCFILES:.c=.o)

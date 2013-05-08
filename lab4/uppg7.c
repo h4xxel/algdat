@@ -15,7 +15,7 @@ struct WORD {
 unsigned int hash_string(const char *string) {
 	unsigned int hash=0;
 	unsigned short i;
-	for(i=1; *string; string++, hash+=(*string)*i, i*=31);
+	for(i=1; *string; string++, hash+=i*(*string), i*=31);
 	return hash;
 }
 

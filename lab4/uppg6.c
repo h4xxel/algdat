@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <termios.h>
+#include <ctype.h>
 
 #define INFO_TABLE 64
 #define PEOPLE_TABLE 1024
@@ -46,7 +47,7 @@ struct PERSON {
 unsigned int hash_string(char *string) {
 	unsigned int hash=0;
 	unsigned short i;
-	for(i=1; *string; string++, hash+=*string*i, i*=31);
+	for(i=1; *string; string++, hash+=i*tolower(*string), i*=31);
 	return hash;
 }
 
@@ -128,7 +129,7 @@ int db_set_or_add_info(struct PERSON *person, char *key, char *value) {
 	unsigned int hash=hash_string(key);
 	struct INFO **info, *newinfo;
 	for(info=&person->info[hash%INFO_TABLE]; *info; info=&(*info)->next) {
-		if(!strcmp(key, (*info)->key)) {
+		if(!strcasecmp(key, (*info)->key)) {
 			free((*info)->value);
 			(*info)->value=value;
 			return 0;
@@ -147,7 +148,7 @@ void db_remove_info(struct PERSON *person, char *key) {
 	unsigned int hash=hash_string(key);
 	struct INFO **info, *tmp;
 	for(info=&person->info[hash%INFO_TABLE]; *info; info=&(*info)->next) {
-		if(strcmp(key, (*info)->key))
+		if(strcasecmp(key, (*info)->key))
 			continue;
 		tmp=*info;
 		*info=tmp->next;
@@ -255,12 +256,12 @@ void db_load() {
 		getc(f);
 		fscanf(f, "%m[^\n]", &value);
 		getc(f);
-		if(!strcmp(key, "Last name")) {
+		if(!strcasecmp(key, "Last name")) {
 			last_name=value;
 			free(key);
 			continue;
 		}
-		if(!strcmp(key, "First name")) {
+		if(!strcasecmp(key, "First name")) {
 			person=db_add_person(value, last_name);
 			free(key);
 			continue;
