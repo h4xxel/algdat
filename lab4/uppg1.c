@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-
 #define COUNTRY_TABLE 1024
 
 struct COUNTRY {
@@ -10,7 +9,6 @@ struct COUNTRY {
 	char *capitol;
 	unsigned long population;
 	unsigned long area;
-	
 	unsigned int hash;
 	struct COUNTRY *next;
 } *country[COUNTRY_TABLE];

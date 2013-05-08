@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <darnit/darnit.h>
-
 #define SIZE 20
 #define PARENT(i) (((i)-1)/2)
 #define LEFT(i) (2*(i)+1)
@@ -156,25 +155,26 @@ void mark_min() {
 	d_text_surface_string_append(min=d_text_surface_new(font, 10, 64, x+add*2-12, y-30), "min");
 }
 
-void mark_inorder(int root, int x, int y, int add) {
+void mark_reverseorder(int root, int x, int y, int add) {
 	int i;
-	i=LEFT(root);
-	if(i<size) {
-		mark_inorder(i, x-add, y+50, add/2);
-		loop();
-		d_render_line_move(path_maxmin, path_maxmin_lines++, x, y, x-add, y+50);
-	}
         i=RIGHT(root);
 	if(i<size) {
-		mark_inorder(i, x+add, y+50, add/2);
+		mark_reverseorder(i, x+add, y+50, add/2);
 		loop();
 		d_render_line_move(path_maxmin, path_maxmin_lines++, x, y, x+add, y+50);
+	}
+	printf("%i\n", tree[root]);
+	i=LEFT(root);
+	if(i<size) {
+		mark_reverseorder(i, x-add, y+50, add/2);
+		loop();
+		d_render_line_move(path_maxmin, path_maxmin_lines++, x, y, x-add, y+50);
 	}
 }
 
 void mark_path_maxmin() {
 	path_maxmin_lines=0;
-	mark_inorder(0, 400, 30, 200);
+	mark_reverseorder(0, 400, 30, 200);
 }
 
 int main(int argc, char **argv) {
