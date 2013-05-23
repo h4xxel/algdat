@@ -1,0 +1,210 @@
+/*uppg1*/
+unsigned int sum(unsigned int n) {
+	if(!n)
+		return n;
+	return n+sum(n-1);
+}
+
+unsigned int sum(unsigned int n) {
+	unsigned int sum;
+	for(sum=0; n; sum+=n, n--);
+	return sum;
+}
+
+unsigned int sum(unsigned int n) {
+	return n*(n+1)/2
+}
+
+
+/*uppg2*/
+unsigned int fib_recursive(unsigned int n, unsigned int val1, unsigned int val2) {
+	if(!n)
+		return val1;
+	return fib_recursive(n-1, val2, val1+val2);
+}
+unsigned int fib(unsigned int n) {
+	fib_recursive(n, 0, 1);
+}
+
+unsigned int fib(unsigned int n) {
+	unsigned int a, b, tmp;
+	for(a=0, b=1; n; n--) {
+		tmp=b;
+		b+=a;
+		a=tmp;
+	}
+	return a;
+}
+
+/*uppg3*/
+void hanoi(STACK *from, STACK *aux, STACK *to, unsigned int n) {
+	if(n<=1) {
+		push(to, pop(from));
+		return;
+	}
+	hanoi(from, to, aux, n-1);
+	hanoi(from, aux, to, 1);
+	hanoi(aux, from, to, n-1);
+}
+
+
+/*uppg8*/
+void sort(int *array, unsigned int n) {
+	unsigned int i, j, min;
+	int tmp;
+	for(i=0; i<n-1; i++) {
+		min=i;
+		for(j=i+1; j<n; j++)
+			if(array[j]<array[min])
+				min=j;
+		if(min==i)
+			continue;
+		tmp=array[i];
+		array[i]=array[min];
+		array[min]=tmp;
+	}
+}
+
+/*uppg9*/
+void sort(int *array, unsigned int n) {
+	unsigned int i, j, min;
+	int tmp;
+	for(i=1; i<n; i++) {
+		tmp=array[i];
+		for(j=i; j>0&&tmp<array[j-1]; array[j]=array[j-1], j--);
+		array[j]=tmp;
+	}
+}
+
+/*uppg10*/
+int *merge(int *left, int *right, unsigned int nl, unsigned int nr) {
+	int *res=malloc(sizeof(int)*(nl+nr)), *insert=res;
+	while(nl||nr) {
+		if(nl&&nr) {
+			if(*left<=*right)
+				goto insertl;
+			goto insertr;
+		} else if(nl) {
+			insertl:
+			*insert=*left;
+			left++;
+			insert++;
+			nl--;
+		} else if(nr) {
+			insertr:
+			*insert=*right;
+			right++;
+			insert++;
+			nr--;
+		}
+	}
+	return res;
+}
+int *sort(int *array, unsigned int n) {
+	int *left, *right, *tmp, middle, i, j;
+	if(n<1)
+		return array;
+	if(n==1) {
+		tmp=malloc(sizeof(int));
+		*tmp=*array;
+		return tmp;
+	}
+	middle=n/2;
+	left=malloc(sizeof(int)*middle);
+	right=malloc(sizeof(int)*(middle+1));
+	for(i=0; i<middle; i++)
+		left[i]=array[i];
+	for(j=0; j<n-middle; j++)
+		right[j]=array[middle+j];
+	tmp=sort(left, i);
+	free(left);
+	left=tmp;
+	tmp=sort(right, j);
+	free(right);
+	right=tmp;
+	tmp=merge(left, right, i, j);
+	free(left);
+	free(right);
+	return tmp;
+}
+
+/*uppg12*/
+int search(int *array, unsigned int min, unsigned int max, int value) {
+	unsigned int middle;
+	if(max<min)
+		return -1;
+	middle=min+(max-min)/2;
+	if(array[middle]>value)
+		return search(array, min, middle-1, value);
+	if(array[middle]<value)
+		return search(array, middle+1, max, value);
+	return middle;
+}
+
+/*uppg13*/
+typedef int *STACK;
+void push(STACK *stack, int val) {
+	**stack=val;
+	(*stack)++;
+}
+int pop(STACK *stack) {
+	(*stack)--;
+	return **stack;
+}
+
+/*uppg14*/
+typedef struct STACK {
+	int value;
+	struct STACK *next;
+} STACK;
+void push(STACK **stack, int value) {
+	STACK *record=malloc(sizeof(STACK));
+	record->value=value;
+	record->next=*stack;
+	*stack=record;
+}
+int pop(STACK **stack) {
+	STACK *tmp=*stack;
+	int value=tmp->value;
+	*stack=tmp->next;
+	free(tmp);
+	return value;
+}
+
+/*uppg17*/
+struct QUEUE_NODE {
+	void *object;
+	struct QUEUE_NODE *prev;
+	struct QUEUE_NODE *next;
+};
+typedef struct QUEUE {
+	struct QUEUE_NODE *first;
+	struct QUEUE_NODE *last;
+} QUEUE;
+void enqueue(QUEUE *queue, void *object) {
+	struct QUEUE_NODE *node;
+	node=malloc(sizeof(struct QUEUE_NODE));
+	node->object=object;
+	node->prev=queue->last;
+	node->next=NULL;
+	if(queue->last)
+		queue->last->next=node;
+	else
+		queue->first=node;
+	queue->last=node;
+}
+void *pop(QUEUE *queue) {
+	struct QUEUE_NODE *node;
+	void *object;
+	if(queue->first) {
+		node=queue->first;
+		object=node->object;
+		if(queue->first->next)
+			queue->first=queue->first->next;
+		else
+			queue->last=queue->first=NULL;
+		free(node);
+		return object;
+	}
+	return NULL;
+}
