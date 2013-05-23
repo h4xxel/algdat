@@ -1,22 +1,34 @@
 /*uppg1*/
+/*Anropskedjan ser ut som följande:
+sum(5) -> 5+sum(4)+sum(3)+sum(2)+sum(1)+sum(0)
+där sum(0) returnerar 0. Varje nytt funktionsanrop lägger
+ett record på systemstacken som innehåller returadressen
+till funktionen den kommer ifrån samt de argument som skickas.*/
 unsigned int sum(unsigned int n) {
 	if(!n)
 		return n;
 	return n+sum(n-1);
 }
 
+/*Problemet kan också lösas iterativt med O(1) minneskomplexitet*/
 unsigned int sum(unsigned int n) {
 	unsigned int sum;
 	for(sum=0; n; sum+=n, n--);
 	return sum;
 }
 
+/*Problemet kan också lösas med O(1) tidskomplexitet genom att
+se det som en aritmetisk summa, vilket är den mest effektiva lösningen*/
 unsigned int sum(unsigned int n) {
 	return n*(n+1)/2
 }
 
 
 /*uppg2*/
+/*Den rekursiva funktionen pushar ett record på
+systemkursen vid varje anrop till sig själv, och gör
+ett anrop för varje tal den ska räkna ut, vilket gör den
+ineffektiv för stora n.*/
 unsigned int fib_recursive(unsigned int n, unsigned int val1, unsigned int val2) {
 	if(!n)
 		return val1;
@@ -26,6 +38,8 @@ unsigned int fib(unsigned int n) {
 	fib_recursive(n, 0, 1);
 }
 
+/*Den iterativa funktionen har statisk [O(1)] minnesanvändning
+och passar därför bättre för stora n*/
 unsigned int fib(unsigned int n) {
 	unsigned int a, b, tmp;
 	for(a=0, b=1; n; n--) {
@@ -37,8 +51,16 @@ unsigned int fib(unsigned int n) {
 }
 
 /*uppg3*/
+/*Vi har två basfall, ett om vi inte ska flytta något torn (n=0)
+och ett om vi ska flytta ett torn som består av bara en bricka.
+Resten av funktionen går ut på att flytta ett torn med n-1 brickor
+till hjälppinnen, flytta den understa brickan till den slutliga pinnen och
+sist flytta tornet på hjälppinnen till den slutgiltiga pinnen.
+Genom induktion kan algoritmen alltså bevisas korrekt.*/
 void hanoi(STACK *from, STACK *aux, STACK *to, unsigned int n) {
-	if(n<=1) {
+	if(!n)
+		return;
+	if(n==1) {
 		push(to, pop(from));
 		return;
 	}
@@ -171,6 +193,67 @@ int pop(STACK **stack) {
 	return value;
 }
 
+/*uppg16*/
+#define POSTFIX_POPARG(operator) \
+	stack--; \
+	a=*stack; \
+	stack--; \
+	b=*stack; \
+	*stack=b operator a; \
+	stack++;
+
+int parse_postfix(char *string) {
+	char *s;
+	int *stack, *save;
+	int a, b;
+	if(!string)
+		return 0;
+	save=stack=malloc(512);
+	while((s=strchr(string, ' '))||(s=strchr(string, '\0'))) {
+		switch(*string) {
+			case '+':
+				if(!*(string+1)||*(string+1)!=' ')
+					goto number;
+				POSTFIX_POPARG(+);
+				break;
+			case '-':
+				if(!*(string+1)||*(string+1)!=' ')
+					goto number;
+				POSTFIX_POPARG(-);
+				break;
+			case '*':
+				POSTFIX_POPARG(*);
+				break;
+			case '/':
+					stack--;
+					a=*stack;
+					if(!a) {
+						fprintf(stderr, "Division by zero\n");
+						free(save);
+						return 0;
+					}
+					stack--;
+					b=*stack;
+					*stack=b / a;
+					stack++;
+				break;
+			default:
+			number:
+				*s=0;
+				*stack=atoi(string);
+				stack++;
+			case ' ':
+				break;
+		}
+		if(!*(string=s+1))
+			break;
+	}
+	stack--;
+	a=*stack;
+	free(save);
+	return a;
+}
+
 /*uppg17*/
 struct QUEUE_NODE {
 	void *object;
@@ -207,4 +290,53 @@ void *pop(QUEUE *queue) {
 		return object;
 	}
 	return NULL;
+}
+
+/*uppg23*/
+/*Array-baserad*/
+int exists(int *array, unsigned int n, int value) {
+	for(; n; n--)
+		if(array[n-1]==value)
+			return 1;
+	return 0;
+}
+
+/*List-baserad*/
+int exists(LIST *list, int value) {
+	for(; list; list=list->next)
+		if(list->value==value)
+			return 1;
+	return 0;
+}
+
+/*uppg24*/
+/*Array-baserad*/
+int remove(int *array, unsigned int n, int value) {
+	unsigned int i;
+	for(i=0; i<n; i++)
+		if(array[i]==value) {
+			for(; i<n-1; i++)
+				array[i]=array[i+1];
+			return n-1;
+		}
+	return n;
+}
+
+/*List-baserad*/
+void remove(LIST **list, int value) {
+	LIST *tmp;
+	for(; *list; list=&(*list)->next)
+		if((*list)->value==value) {
+			tmp=*list;
+			*list=tmp->next;
+			free(tmp);
+			return;
+		}
+}
+
+/*uppg30*/
+void inorder(BST *bst) {
+	inorder(bst->left);
+	printf("%i\n", bst->value);
+	inorder(bst->right);
 }
